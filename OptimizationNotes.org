@@ -14,7 +14,7 @@
 #+latex_header: \providecommand{\diff}[2]{\ensuremath{\frac{{\rm d} #1}{{\rm d} #2}}}
 #+latex_header: \providecommand{\note}[1]{\sidenote{{\footnotesize #1}}}
 
-* Solution of Initial Value Problems
+* Initial Value Problems
 The general form of a first order initial value problem (IVP) can be stated as follows\note{Different notation for differentiation}:
 
 \begin{margintable}
@@ -36,9 +36,12 @@ The general form of a first order initial value problem (IVP) can be stated as f
 \end{align}
 \end{subequations}
 
+The dependent variable $z$ is a vector of $m$ components. The independent variable $t$ is a scalar within the specified range from 0 to $t_{f}$.If $t$ does not appear explicitly in
+the governing equation $f(\cdot)$, the system is called \emph{autonomous}. Otherwise, the system is \emph{nonautomonous}. The initial state of the system is given by a known
+parameter vector $z_0$. 
 
-The dependent variable $z$ is a vector of $m$ components. The independent variable $t$ is a scalar within the specified range from 0 to $t_{f}$.If $t$ does not
-appear explicitly in the governing equation $f(\cdot)$, the system is called \emph{autonomous}. Otherwise, the system is \emph{nonautomonous}.
+** Numerical Solution Methods
+
 
 #+latex: \end{document}
 bibliography:../../../Emacs/MyBibTex/library.bib
