@@ -14,20 +14,20 @@
 #+latex_header: \providecommand{\diff}[2]{\ensuremath{\frac{{\rm d} #1}{{\rm d} #2}}}
 #+latex_header: \providecommand{\note}[1]{\sidenote{{\footnotesize #1}}}
 
-* Solution of Initial Value Problems
+* Initial Value Problems
 The general form of a first order initial value problem (IVP) can be stated as follows\note{Different notation for differentiation}:
 
 \begin{margintable}
 \footnotesize
 \begin{tabular}{ll}
  Gottfried Leibniz & $\frac{\rm dz^{{n}}}{\rm dt^{{n}}}$  \\
- Joseph Louis Lagrange & $z^{\prime}(t), z^{\prime\prime}(t),..z^{n}(t)$ \\
+ Joseph Louis Lagrange & $z^{\prime}(t), z^{\prime\prime}(t),..z^{(n)}(t)$ \\
  Isaac Newton & $\dot z$, $\ddot z$, ..
 \end{tabular}
 \end{margintable}
 
 \begin{subequations}
-\label{ivp-gen-form-def}
+\label{eq:ivp-gen-form-def}
 \begin{align}
 \label{eq:ivp-gen-form-def-a}
 & \diff{z}{t}= f(z,t), \qquad t \in [0,t_{f}]; \\
@@ -36,9 +36,39 @@ The general form of a first order initial value problem (IVP) can be stated as f
 \end{align}
 \end{subequations}
 
+The dependent variable $z$ is a vector of $m$ components. The independent variable $t$ is a scalar within the specified range from 0 to $t_{f}$.If $t$ does not appear explicitly in
+the governing equation $f(\cdot)$, the system is called \emph{autonomous}. Otherwise, the system is \emph{nonautomonous}. The initial state of the system is given by a known
+parameter vector $z_0$. 
 
-The dependent variable $z$ is a vector of $m$ components. The independent variable $t$ is a scalar within the specified range from 0 to $t_{f}$.If $t$ does not
-appear explicitly in the governing equation $f(\cdot)$, the system is called \emph{autonomous}. Otherwise, the system is \emph{nonautomonous}.
-
+** Numerical Solution Methods
+Numberical solution approaches deal with finite dimensional representations of Eq.eqref:eq:ivp-gen-form-def after discritizing the equations in the continuous interval. For that, a
+mesh is introduced with a sequence of $N+1$ distant points:
+\begin{equation}
+\label{eq:ivp-mesh-def}
+0=t_{0}<t_{1}<\cdots<t_{n-1}<t_{n}<\cdots<t_{N}=t_{f}
+\end{equation} 
+and the length of the $n^{th}$ step is denoted by:
+\begin{equation}
+\label{eq:ivp-step-size-def}
+h_{n} = t_{n} - t_{n-1}, \qquad n=1,2,\ldots,N.
+\end{equation} 
+It's generally helpful to use Taylor's expansion to derive numerical solution procedures to Eq.eqref:eq:ivp-gen-form-def-a. Consider a Taylor series at $t=t_{n-1}$: 
+\begin{equation}
+\label{eq:ivp-taylor-series-def}
+z(t_{n}) = z(t_{n-1}) + h_{n}z'(t_{n-1}) + \frac{h^{2}_{n}}{2}z''(t_{n-1}) + \ldots + \frac{h^{p}_{n}}{k!}z^{(p)}(t_{n-1}) + \ldots,
+\end{equation}
+which is often trucated up to the second order:
+\begin{margintable}
+\footnotesize
+$x=\mathcal{O}(h^{p})$ means $\exists C>0$ such that \left | x \right | \leqslant Ch^{p}.
+\end{margintable}
+\begin{equation}
+\label{eq:ivp-taylor-series-truc}
+z(t_{n}) = z(t_{n-1}) + h_{n}z'(t_{n-1}) + \frac{h^{2}_{n}}{2}z''(t_{n-1}) + \mathcal{O}(h^{2}_{n})
+\end{equation}
+*** First Order Approaches
+Three well known basic approaches for IVPs are the forward Euler, backward Euler, and Trapezoidal methods.
+**** Forward Euler
+If the expansion in Eq.eqref:eq:ivp-taylor-series-def is only up to the first order, 
 #+latex: \end{document}
 bibliography:../../../Emacs/MyBibTex/library.bib
