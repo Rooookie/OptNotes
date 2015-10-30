@@ -1,4 +1,4 @@
-% Created 2015-10-29 Thu 08:26
+% Created 2015-10-30 Fri 00:27
 \documentclass[letterpaper, 11pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -52,7 +52,7 @@ The general form of a first order initial value problem (IVP) can be stated as f
 \label{eq:ivp-gen-form-def}
 \begin{align}
 \label{eq:ivp-gen-form-def-a}
-& \diff{z}{t}= f(z,t), \qquad t \in [0,t_{f}]; \\
+& \diff{z}{t}= f(t,z), \qquad t \in [0,t_{f}]; \\
 \label{eq:ivp-gen-form-def-b}
 & z(0) = z_{0}. 
 \end{align}
@@ -78,7 +78,7 @@ h_{n} = t_{n} - t_{n-1}, \qquad n=1,2,\ldots,N.
 It's generally helpful to use Taylor's expansion to derive numerical solution procedures to Eq.\eqref{eq:ivp-gen-form-def-a}. Consider a Taylor series at $t=t_{n-1}$: 
 \begin{equation}
 \label{eq:ivp-taylor-series-def}
-z(t_{n}) = z(t_{n-1}) + h_{n}z'(t_{n-1}) + \frac{h^{2}_{n}}{2}z''(t_{n-1}) + \ldots + \frac{h^{p}_{n}}{k!}z^{(p)}(t_{n-1}) + \ldots,
+z(t_{n}) = z(t_{n-1} + h_{n}) = z(t_{n-1}) + h_{n}z'(t_{n-1}) + \frac{h^{2}_{n}}{2}z''(t_{n-1}) + \ldots + \frac{h^{p}_{n}}{k!}z^{(p)}(t_{n-1}) + \ldots,
 \end{equation}
 which is often trucated up to the second order:
 \begin{margintable}
@@ -92,12 +92,64 @@ z(t_{n}) = z(t_{n-1}) + h_{n}z'(t_{n-1}) + \frac{h^{2}_{n}}{2}z''(t_{n-1}) + \ma
 \subsubsection{First Order Approaches}
 \label{sec-1-1-1}
 Three well known basic approaches for IVPs are the forward Euler, backward Euler, and Trapezoidal methods.
-\begin{enumerate}
-\item Forward Euler
+\paragraph{Forward Euler}
 \label{sec-1-1-1-1}
-If the expansion in Eq.\eqref{eq:ivp-taylor-series-def} is only up to the first order, 
+If the expansion in Eq.\eqref{eq:ivp-taylor-series-def} is only up to the first order, we have 
+\begin{margintable}
+\footnotesize
+We note $z(t_{n})$ as $z_{n}$ for short
+\end{margintable}
+\begin{equation}
+\label{eq:ivp-forward-euler}
+z_{n} \approx z_{n-1} + h_{n}z'_{n-1}, \qquad, n=1,2,\ldots,N.
+\end{equation}
+Evaluate the derivative $z'_{n-1} = f(t_{n-1},z_{n-1})$ and use the first order approaxiation, and the forward Euler formula\note{This is an explicit formula} is
+\begin{equation}
+\label{eq:ivp-forward-euler-step}
+z_{n} = z_{n-1} + h_{n}f(t_{n-1},z_{n-1}), \qquad, n=1,2,\ldots,N.
+\end{equation} 
+\paragraph{Backward Euler}
+\label{sec-1-1-1-2}
+The backward Euler formula is also derived from Taylor series of centered at $t=t_{n}$:
+\begin{equation}
+\label{ivp-backward-euler}
+z(t_{n}) = z(t_{n+1} - h_{n+1}) = z(t_{n+1}) - h_{n+1}z'(t_{n}) + \frac{h^{2}_{n+1}}{2}z''(t_{n}) + \mathcal{O}(h^{2}_{n+1})
+\end{equation}
+Similar to the previous procedure, we obtain the backward Euler formula\note{This is an implicit formula}:
+\begin{equation}
+\label{eq:ivp-backward-euler-step}
+z_{n+1} = z_{n} + h_{n+1}f(t_{n},z_{n})
+\end{equation}
+\paragraph{Trapezoidal Method}
+\label{sec-1-1-1-3}
+The Trapezoidal rule is developed by Taylor expansion centered at $t_{n-\frac{1}{2}}=t_{n-1} + \frac{h_{n}}{2}$:
+\begin{subequations}
+\label{eq:ivp-trapezoidal-method-taylor}
+\begin{align}
+\label{eq:ivp-trapezoidal-method-taylor-a}
+&z(t_{n}) = z(t_{n-\frac{1}{2}} + \frac{h_{n}}{2}) = z(t_{n-\frac{1}{2}}) + \frac{h_{n}}{2}z'(t_{n-\frac{1}{2}}) + \frac{h_{n}^{2}}{2\cdot2^{2}}z''(t_{n-\frac{1}{2}}) + \mathcal{O}(h^{2}_{n}) \\
+\label{eq:ivp-trapezoidal-method-taylor-b}
+&z(t_{n-1}) = z(t_{n-\frac{1}{2}} - \frac{h_{n}}{2}) = z(t_{n-\frac{1}{2}}) - \frac{h_{n}}{2}z'(t_{n-\frac{1}{2}}) + \frac{h_{n}^{2}}{2\cdot2^{2}}z''(t_{n-\frac{1}{2}}) + \mathcal{O}(h^{2}_{n})
+\end{align}
+\end{subequations}
+Substract Eq.\eqref{eq:ivp-trapezoidal-method-taylor-b} with Eq.\eqref{eq:ivp-trapezoidal-method-taylor-a} and devide by the step size $h_{n}$:
+\begin{equation}
+\label{eq:ivp-trapezoidal-step-a}
+\frac{z_{n} - z_{n-1}}{h_{n}} = z'_{n-\frac{1}{2}} + \mathcal{O}(h^{2}_{n})
+\end{equation}  
+Evaluating the derivatie at the middle point and rearranging the above equation leads to
+\begin{margintable}
+\footnotesize
+Derivative at the middle point\\
+$z'_{n-\frac{1}{2}} = \frac{1}{2}\left (f(t_{n-1},z_{n-1}) + f(t_{n},z_{n})\right)$
+\end{margintable}
+
+\begin{equation}
+\label{eq:ivp-trapezoidal-step-b}
+z_{n} = z_{n-1} + \frac{h_{n}}{2}\left (f(t_{n-1},z_{n-1}) +  f(t_{n},z_{n})\right)
+\end{equation} 
+
 \end{document}
 \bibliography{/Users/yisu/Emacs/MyBibTex/library}
-\end{enumerate}
 % Emacs 24.4.1 (Org mode 8.2.10)
 \end{document}
