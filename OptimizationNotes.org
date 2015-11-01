@@ -1,7 +1,7 @@
 #+author: Yisu Nie
 #+email: ynie@dow.com
 #+startup: showall hideblocks
-#+title: Notes on Numerical Optimization Methods 
+#+title: Notes on Dynamic Optimization  
 #+latex_class: article
 #+latex_class_options: [letterpaper, 11pt]
 #+options: H:4 toc:nil ^:nil    
@@ -12,11 +12,14 @@
 #+latex_header: \usepackage[top=1in, bottom=1in, right = 0.5in, outer=3in, inner=0.5in, heightrounded, marginparwidth=2.5in, marginparsep=0.25in]{geometry}
 #+latex_header: \linespread{1.3}
 #+latex_header: \providecommand{\diff}[2]{\ensuremath{\frac{{\rm d} #1}{{\rm d} #2}}}
-#+latex_header: \providecommand{\note}[1]{\sidenote{{\footnotesize #1}}}
+#+latex_header: \providecommand{\note}[1]{\begin{margintable}{\footnotesize #1}\end{margintable}}
+#+latex_header: \providecommand{\abs}[1]{\ensuremath{\left | #1\right |}}
+#+latex_header: \providecommand{\On}[1]{\ensuremath{\mathcal{O}(h^{#1})}}
+#+latex_header: \graphicspath{{./image/}}
 
 * Initial Value Problems
-The general form of a first order initial value problem (IVP) can be stated as follows\note{Different notation for differentiation}:
-
+The general form of a first order initial value problem (IVP) for ordinary differential equation (ODE) systems can be stated as follows:
+\note{Different notation for differentiation:}
 \begin{margintable}
 \footnotesize
 \begin{tabular}{ll}
@@ -40,7 +43,6 @@ The dependent variable $z$ is a vector of $m$ components. The independent variab
 the governing equation $f(\cdot)$, the system is called \emph{autonomous}. Otherwise, the system is \emph{nonautomonous}. The initial state of the system is given by a known
 parameter vector $z_0$. 
 
-** Numerical Solution Methods
 Numberical solution approaches deal with finite dimensional representations of Eq.eqref:eq:ivp-gen-form-def after discritizing the equations in the continuous interval. For that, a
 mesh is introduced with a sequence of $N+1$ distant points:
 \begin{equation}
@@ -66,9 +68,9 @@ $x=\mathcal{O}(h^{p})$ means $\exists C>0$ such that \left | x \right | \leqslan
 \label{eq:ivp-taylor-series-truc}
 z(t_{n}) = z(t_{n-1}) + h_{n}z'(t_{n-1}) + \frac{h^{2}_{n}}{2}z''(t_{n-1}) + \mathcal{O}(h^{2}_{n})
 \end{equation}
-*** First Order Approaches
+** Basic First Order Approaches
 Three well known basic approaches for IVPs are the forward Euler, backward Euler, and Trapezoidal methods.
-**** Forward Euler
+*** Forward Euler
 If the expansion in Eq.eqref:eq:ivp-taylor-series-def is only up to the first order, we have 
 \begin{margintable}
 \footnotesize
@@ -83,7 +85,13 @@ Evaluate the derivative $z'_{n-1} = f(t_{n-1},z_{n-1})$ and use the first order 
 \label{eq:ivp-forward-euler-step}
 z_{n} = z_{n-1} + h_{n}f(t_{n-1},z_{n-1}), \qquad, n=1,2,\ldots,N.
 \end{equation} 
-**** Backward Euler
+\begin{margintable}
+\footnotesize
+Truncation error is obtained by inserting the analytical solution z(t) into the numerical method and dividing by the step size:
+\[ T_{n} = \frac{z_{n+1} - z_{n}}{h} - f \left( t_{n}, z(t_{n}) \right)\],
+and $f \left( t_{n}, z(t_{n}) \right) = z'(t_{n})$.
+\end{margintable}
+*** Backward Euler
 The backward Euler formula is also derived from Taylor series of centered at $t=t_{n}$:
 \begin{equation}
 \label{ivp-backward-euler}
@@ -94,7 +102,7 @@ Similar to the previous procedure, we obtain the backward Euler formula\note{Thi
 \label{eq:ivp-backward-euler-step}
 z_{n+1} = z_{n} + h_{n+1}f(t_{n},z_{n})
 \end{equation}
-**** Trapezoidal Method
+*** Trapezoidal Method
 The Trapezoidal rule is developed by Taylor expansion centered at $t_{n-\frac{1}{2}}=t_{n-1} + \frac{h_{n}}{2}$:
 \begin{subequations}
 \label{eq:ivp-trapezoidal-method-taylor}
@@ -114,16 +122,145 @@ Evaluating the derivatie at the middle point and rearranging the above equation 
 \begin{margintable}
 \footnotesize
 Derivative at the middle point\\
-$z'_{n-\frac{1}{2}} = \frac{1}{2}\left (f(t_{n-1},z_{n-1}) + f(t_{n},z_{n})\right)$
+$z'_{n-\frac{1}{2}} = \frac{1}{2}\left (f(t_{n-1},z_{n-1}) + f(t_{n},z_{n})\right)$\\
+\includegraphics[scale=0.7]{1-ivp-trapezoidal}
 \end{margintable}
 
 \begin{equation}
 \label{eq:ivp-trapezoidal-step-b}
 z_{n} = z_{n-1} + \frac{h_{n}}{2}\left (f(t_{n-1},z_{n-1}) +  f(t_{n},z_{n})\right)
 \end{equation} 
-#+begin_src asymptote
+** Stability and Stiffness
+*** Stability
+Stability can be interpreted as the integration solution $z_{n=1,..,N}$ should not instigate substantial changes with small changes in the initial condition $z_{0}$. This
+transaltes to the careful choice of the step size $h_{n}$ in the Euler and Trapezoidal methods.
+\begin{margintable}
+\footnotesize
+We should be careful when using the term stability: it could refer to the stability of the prolem or the numerical method, and we exam the latter in this section. 
+\end{margintable}
+A linear test fucntion is often introudced for stability analysis: 
+\begin{margintable}
+\footnotesize
+For nonlinear systems, consider the derivative (Jocobian in case of mutiple states) $\lambda = \diff{f}{z}$. 
+\end{margintable}
+\begin{equation}
+\label{eq:ivp-stability-test-func}
+z'=\lambda z,\qquad z(0) = z_{0}
+\end{equation}
+with the exact solution:
+\begin{equation}
+\label{eq:ivp-stability-test-func-sltn}
+z(t) = z_{0}e^{\lambda t}
+\end{equation}
+Depending on the different values of the real part of $\lambda$, we have
+\begin{margintable}
+\footnotesize
+More rigourous definition on stability is given in Chapter 2 of Ascher and Petzold~\cite{M.Ascher1998b}}
+\end{margintable}
+|-------------------------------------+-----------------------+-------------------------------------------------------------------------|
+| $\operatorname{Re}(\lambda) \leq 0$ | Stable                | May oscillate ($\operatorname{Re}(\lambda) = 0$ and $\lambda \not = 0$) |
+| $\operatorname{Re}(\lambda) < 0$    | Asymptotically Stable | Exponential decay                                                       |
+| $\operatorname{Re}(\lambda) > 0$    | Unstable              | Exponential growth                                                      |
+|-------------------------------------+-----------------------+-------------------------------------------------------------------------|
+Take the forward Euler method as an example, we substitute the recursive formula eqref:eq:ivp-forward-euler-step to Eq.eqref:eq:ivp-stability-test-func-sltn:
+\begin{equation}
+\label{eq:ivp-forward-euler-stability}
+z_{n} = z_{0}(1 + h\lambda)^{n}
+\end{equation}
+\note{Here we assume a uniform step size $h$}
+The solution is stable if 
+\begin{equation}
+\label{eq:ivp-forward-euler-stability-condition}
+\left | 1 + h\lambda \right | \leq 1 
+\end{equation} 
+\begin{margintable}
+\footnotesize
+Decay of $\abs{z_{n}} \text{requires} \abs{\frac{z_{n}}{z_{n-1}}} \leq 1$
+\end{margintable}
+This describes the region of absolute stability.
+\begin{margintable}
+\footnotesize
+If a method is absolutely stable for all $\operatorname{Re}(\lambda) \leq 0$, then it is A-stable, where $h$ is no longer limtied by stability conditions.
+\end{margintable}
+Similar results can be derived for the backward Euler and the Trapezoidal methods:
+\begin{subequations}
+\begin{align}
+\label{eq:ivp-stability-conditions}
+&\frac{1}{\abs{ 1 - h\lambda}} \leq 1, \qquad \text{(Backward Euler)} \\
+&\abs{\frac{1+h\lambda/2}{1-h\lambda/2}} \leq 1, \qquad \text{(Trapezoidal Rule)}
+\end{align}
+\end{subequations}
 
-#+end_src
+*** Stiffness
+The term stiffness is also used broadly to capture differential equations systems that:
++ contain widely varying time scales, i.e., some components of the solution decay much more rapidly than others.
++ have numerical integration step size dictated by stability requirements rather than by accuracy requirements.
++ cannot be solved by explicit methods, or only extremely slowly.
 
-#+latex: \end{document}
-bibliography:../../../Emacs/MyBibTex/library.bib
+** Runge-Kutta Methods
+Runge-Kutta methods aim to achieve higher accuracy by using intermediate evaluation points between $t_{n}$ and $t_{n+1}$. If $s$ intermediate points are used, we call this a
+s-stage Runge-Kutta formula\note{This is the explicit Runge-Kutta methed family, and it reduces to the forward Euler method when $i=1$}:
+\begin{subequations}
+\label{eq:ivp-rk-s-stage}
+\begin{align}
+&z_{n+1} = z_{n} + h\sum_{i=1}^{s}b_{i}k_{i} \\
+&k_{i} = f \left( t_{n} + c_{i}h, z_{n} + h\sum_{j=1}^{i-1}a_{ij}k_{j} \right) \\
+\label{eq:ivp-rk-s-stage-c}
+&c_{1} = 0, \qquad c_{i} = \sum_{j=1}^{i-1}a_{ij}.
+\end{align}
+\end{subequations}
+Here, $a_{ij}$ is the Runge-Kutta matrix, $b_{i}$ is the weights, and $c_{i}$ is the nodes. A short hand notation for the coefficients is known as the Buthcer tableau:
+
+\begin{margintable}
+\footnotesize
+Derivation of 2-stage Runge-Kutta formula\\
+\begin{align*}
+& z_{n+1} = z_{n} + h f\left( b_{1}k_{1} + b_{2}k_{2} \right)\\
+& k_{1} = f \left( t_{n}, y_{n} \right)\\
+& k_{2} = f \left( t_{n} + c_{2}h, z_{n} + ha_{21}k_{1} \right)
+\end{align*}
+We have $c_{2}=a_{21}$ from Eq.~\eqref{eq:ivp-rk-s-stage-c}. The other coefficients are chosen to maximize the numerical accuracy by looking at the local truncation error. Consider Taylor series to $z_{n+1}$:
+\begin{align*}
+& z_{n+1} = z(t_{n+1}) = z \left( t_{n} + h \right)\\
+& z_{n+1} = z_{n} + z'_{n}h + \frac{1}{2}z''_{n}h^{2} + \On{2}\\
+& z_{n+1} = z_{n} + hf_{n} + \frac{1}{2} h^{2}\left( f_{t} + ff_{z} \right)_{n} + \On{2}    
+\end{align*}
+Consider Taylor series to $k_{1}$ and $k_{2}$:
+\begin{align*}
+& k_{1} = f_{n} \\
+& k_{2} = f_{n} + h \left( c_{2}f_{t} + a_{21}ff_{z} \right)_{n} + \On{2} \\
+& z_{n+1} = z_{n} + (b_{1} + b_{2})hf_{n} \\
+& \qquad \quad + b_{2}h^{2}\left( c_{2}f_{t} + a_{21}ff_{z} \right)_{n} + \On{2}
+\end{align*}
+Compare the two expressions, we have $b_{1} + b_{2} = 1$ and $b_{2}c_{2} = b_{2}a_{21} = \frac{1}{2}$ 
+\end{margintable}
+\begin{center}
+\begin{tabular}{c|ccccc}
+$c_{1}$ &          &           &          &             & \\
+$c_{2}$ & $a_{21}$ &           &          &             & \\
+$c_{3}$ & $a_{31}$ & $a_{32}$  &          &             & \\
+$\vdots$& $\vdots$ &           & $\ddots$ &             & \\
+$c_{s}$ & $a_{s1}$ & $a_{s2}$  & $\cdots$ & $a_{s,s-1}$ & \\ \hline
+        & $b_{1}$  & $b_{2}$   & $\cdots$ & $b_{s-1}$   & $b_{s}$
+\end{tabular}
+\end{center}
+One of the most popular numerical approaches for IVPs is the classic four-stage Runge-Kutta method:
+\begin{subequations}
+\begin{align}
+\label{eq:ivp-rk-4-stage}
+& z_{n+1} = z_{n} + \frac{1}{6}h \left( k_{1} + 2k_{2} + 2k_{3} + k_{4} \right) \\
+& k_{1} = f \left( t_{n}, z_{n} \right) \\
+& k_{2} = f \left( t_{n} + \frac{1}{2}h, z_{n} + \frac{1}{2}hk_{1} \right) \\
+& k_{3} = f \left( t_{n} + \frac{1}{2}h, z_{n} + \frac{1}{2}hk_{2} \right) \\
+& k_{4} = f \left( t_{n} + h, z_{n} + hk_{3} \right) 
+\end{align}
+\end{subequations}
+ 
+
+TODO implicit Runge-Kutta
+
+** Multi-step Approaches
+* Bundary Value Problems
+
+#+latex: \bibliographystyle{plain}
+bibliography:./library.bib
